@@ -1,47 +1,35 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-import api from "../services/api";
+import React, { createContext, useContext, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchUser, loginUser, logoutUser } from "../store/slices/authSlice";
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, error } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const checkLoggedIn = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const response = await api.get("/auth/user");
-          setUser(response.data);
-        } catch (error) {
-          console.error("Error fetching user:", error);
-          localStorage.removeItem("token");
-        }
-      }
-      setLoading(false);
-    };
-    checkLoggedIn();
-  }, []);
+    if (!user) {
+      dispatch(fetchUser());
+    }
+  }, [dispatch, user]);
 
-  const login = async (credentials) => {
-    const response = await api.post("/auth/login", credentials);
-    localStorage.setItem("token", response.data.access_token);
-    setUser(response.data.user);
+  const login = (credentials) => {
+    return dispatch(loginUser(credentials));
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
+    dispatch(logoutUser());
   };
 
   const value = {
     user,
+    loading,
+    error,
     login,
     logout,
-    loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

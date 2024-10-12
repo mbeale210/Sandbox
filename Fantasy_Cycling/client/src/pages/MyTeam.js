@@ -1,20 +1,39 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchUserTeams, updateRoster } from "../store/slices/teamSlice";
+import { fetchUserTeams, addRiderToTeam } from "../store/slices/teamSlice";
+import api from "../services/api";
 
 const MyTeam = () => {
   const { teamId } = useParams();
   const dispatch = useDispatch();
   const { teams, loading } = useSelector((state) => state.teams);
+  const [availableRiders, setAvailableRiders] = useState([]);
   const team = teams.find((t) => t.id.toString() === teamId);
 
   useEffect(() => {
     dispatch(fetchUserTeams());
+
+    // Fetch available riders to add to team
+    const fetchAvailableRiders = async () => {
+      try {
+        const response = await api.get("/riders/rankings");
+        setAvailableRiders(response.data);
+      } catch (err) {
+        console.error("Failed to fetch riders.");
+      }
+    };
+
+    fetchAvailableRiders();
   }, [dispatch]);
 
-  const handleRosterUpdate = (updatedRoster) => {
-    dispatch(updateRoster({ teamId: team.id, rosterData: updatedRoster }));
+  const handleAddRider = async (riderId) => {
+    try {
+      await dispatch(addRiderToTeam({ teamId: team.id, riderId }));
+      alert("Rider added to team successfully!");
+    } catch (err) {
+      console.error("Error adding rider to team", err);
+    }
   };
 
   if (loading) return <div>Loading team...</div>;
@@ -26,37 +45,17 @@ const MyTeam = () => {
       <p>Total Points: {team.sprint_pts + team.mountain_pts}</p>
       <p>Trades Left: {team.trades_left}</p>
 
-      <h2>GC Riders</h2>
-      <div>
-        <h3>Active GC Rider</h3>
-        {team.active_gc_rider ? (
-          <p>{team.active_gc_rider.name}</p>
-        ) : (
-          <p>No active GC rider</p>
-        )}
-      </div>
-      <div>
-        <h3>Bench GC Riders</h3>
-        {team.bench_gc_riders.map((rider) => (
-          <p key={rider.id}>{rider.name}</p>
-        ))}
-      </div>
+      <h2>Riders on Team</h2>
+      {team.riders.map((rider) => (
+        <p key={rider.id}>{rider.name}</p>
+      ))}
 
-      <h2>Domestiques</h2>
-      <div>
-        <h3>Active Domestiques</h3>
-        {team.active_domestiques.map((rider) => (
-          <p key={rider.id}>{rider.name}</p>
-        ))}
-      </div>
-      <div>
-        <h3>Bench Domestiques</h3>
-        {team.bench_domestiques.map((rider) => (
-          <p key={rider.id}>{rider.name}</p>
-        ))}
-      </div>
-
-      {/* Add UI elements for updating roster */}
+      <h2>Add a Rider</h2>
+      {availableRiders.map((rider) => (
+        <button key={rider.id} onClick={() => handleAddRider(rider.id)}>
+          {rider.name}
+        </button>
+      ))}
     </div>
   );
 };

@@ -44,14 +44,14 @@ const OpenRiders = () => {
       if (rider.role === "gc") {
         // Draft as GC rider
         newRoster = {
-          ...userTeam, // Preserve the rest of the team's structure
-          active_gc_rider: rider, // Replace current GC rider with drafted rider
+          ...userTeam,
+          active_gc_rider: rider,
         };
       } else if (rider.role === "domestique") {
         // Draft as Domestique
         newRoster = {
-          ...userTeam, // Preserve the rest of the team's structure
-          active_domestiques: [...userTeam.active_domestiques, rider], // Add to active domestiques
+          ...userTeam,
+          active_domestiques: [...userTeam.active_domestiques, rider],
         };
       } else {
         alert("Rider role is not supported for drafting.");
