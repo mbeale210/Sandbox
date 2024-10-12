@@ -1,0 +1,56 @@
+# Ignore Python related files and folders
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.env
+*.log
+*.sqlite3
+*.db
+instance/
+venv/
+Pipfile.lock
+env/
+.idea/
+
+# Ignore Flask migration files
+migrations/
+
+# Ignore virtual environment files
+.venv/
+
+# Ignore compiled and cache files
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+
+# Ignore log files
+*.log
+
+# Ignore React/Node.js related files
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+*.env.local
+*.env.development
+*.env.production
+*.env.test
+.cache/
+
+# Ignore build files
+build/
+dist/
+coverage/
+
+# Ignore dependencies from package managers
+package-lock.json
+yarn.lock
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore VSCode settings
+.vscode/
