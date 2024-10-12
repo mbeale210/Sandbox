@@ -36,8 +36,29 @@ const OpenRiders = () => {
   const handleDraft = (rider) => {
     // Assuming the user has only one team for simplicity
     const userTeam = teams[0];
+
     if (userTeam && userTeam.trades_left > 0) {
-      // ... (rest of the draft logic)
+      let newRoster = {};
+
+      // Check the role of the drafted rider and add them to the correct spot
+      if (rider.role === "gc") {
+        // Draft as GC rider
+        newRoster = {
+          ...userTeam, // Preserve the rest of the team's structure
+          active_gc_rider: rider, // Replace current GC rider with drafted rider
+        };
+      } else if (rider.role === "domestique") {
+        // Draft as Domestique
+        newRoster = {
+          ...userTeam, // Preserve the rest of the team's structure
+          active_domestiques: [...userTeam.active_domestiques, rider], // Add to active domestiques
+        };
+      } else {
+        alert("Rider role is not supported for drafting.");
+        return;
+      }
+
+      // Dispatch the updated roster
       dispatch(
         updateRoster({
           teamId: userTeam.id,
