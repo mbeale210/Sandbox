@@ -1,12 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from app.models.user import User
-from app import db, jwt
+from app import db
+from flask_cors import cross_origin  # Import cross_origin for handling CORS
 
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.route('/register', methods=['POST'])
+@auth_bp.route('/register', methods=['POST', 'OPTIONS'])  # Allow OPTIONS requests
+@cross_origin()  # Apply CORS to this specific route
 def register():
+    if request.method == 'OPTIONS':  # Handle preflight request
+        return jsonify({'message': 'CORS preflight successful'}), 200
+
     data = request.get_json()
     if User.query.filter_by(username=data['username']).first():
         return jsonify({"message": "Username already exists"}), 400
@@ -19,8 +24,12 @@ def register():
     db.session.commit()
     return jsonify({'message': 'Registered successfully'}), 201
 
-@bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST', 'OPTIONS'])  # Allow OPTIONS requests for login
+@cross_origin()  # Apply CORS to the login route
 def login():
+    if request.method == 'OPTIONS':  # Handle preflight request
+        return jsonify({'message': 'CORS preflight successful'}), 200
+
     data = request.get_json()
     user = User.query.filter_by(username=data['username']).first()
     if user and user.check_password(data['password']):
@@ -37,14 +46,14 @@ def login():
         }), 200
     return jsonify({'message': 'Invalid username or password'}), 401
 
-@bp.route('/refresh', methods=['POST'])
+@auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
     current_user = get_jwt_identity()
     new_access_token = create_access_token(identity=current_user)
     return jsonify({'access_token': new_access_token}), 200
 
-@bp.route('/user', methods=['GET'])
+@auth_bp.route('/user', methods=['GET'])
 @jwt_required()
 def get_user():
     current_user_id = get_jwt_identity()

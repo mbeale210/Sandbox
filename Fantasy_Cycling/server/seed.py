@@ -45,7 +45,13 @@ def seed_stages():
     db.session.commit()
 
 def seed_users():
-    for i in range(10):
+    # Add the specified user
+    brigid = User(username="Brigid", email="brigid@gmail.com")
+    brigid.set_password("1234jkl!")
+    db.session.add(brigid)
+
+    # Add the other users
+    for i in range(9):  # Changed to 9 to keep total number of users at 10
         user = User(username=f"user{i}", email=f"user{i}@example.com")
         user.set_password("password")
         db.session.add(user)
