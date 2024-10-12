@@ -1,43 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { fetchUserTeams, addRiderToTeam } from "../store/slices/teamSlice";
-import api from "../services/api";
+import { fetchUserTeams } from "../store/slices/teamSlice";
 
 const MyTeam = () => {
   const { teamId } = useParams();
   const dispatch = useDispatch();
   const { teams, loading } = useSelector((state) => state.teams);
-  const [availableRiders, setAvailableRiders] = useState([]);
   const team = teams.find((t) => t.id.toString() === teamId);
 
   useEffect(() => {
     dispatch(fetchUserTeams());
-
-    // Fetch available riders to add to team
-    const fetchAvailableRiders = async () => {
-      try {
-        const response = await api.get("/riders/rankings");
-        setAvailableRiders(response.data);
-      } catch (err) {
-        console.error("Failed to fetch riders.");
-      }
-    };
-
-    fetchAvailableRiders();
   }, [dispatch]);
-
-  const handleAddRider = async (riderId) => {
-    try {
-      await dispatch(addRiderToTeam({ teamId: team.id, riderId }));
-      alert("Rider added to team successfully!");
-    } catch (err) {
-      console.error("Error adding rider to team", err);
-    }
-  };
 
   if (loading) return <div>Loading team...</div>;
   if (!team) return <div>Team not found</div>;
+
+  const activeGcRider = team.active_gc_rider || {};
+  const activeDomestiques = team.active_domestiques || [];
+  const benchDomestiques = team.bench_domestiques || [];
+  const benchGcRiders = team.bench_gc_riders || [];
 
   return (
     <div className="my-team">
@@ -45,17 +27,41 @@ const MyTeam = () => {
       <p>Total Points: {team.sprint_pts + team.mountain_pts}</p>
       <p>Trades Left: {team.trades_left}</p>
 
-      <h2>Riders on Team</h2>
-      {team.riders.map((rider) => (
-        <p key={rider.id}>{rider.name}</p>
-      ))}
+      <h2>GC Riders</h2>
+      <div>
+        <h3>Active GC Rider</h3>
+        {activeGcRider.name ? (
+          <p>{activeGcRider.name}</p>
+        ) : (
+          <p>No active GC rider</p>
+        )}
+      </div>
+      <div>
+        <h3>Bench GC Riders</h3>
+        {benchGcRiders.length > 0 ? (
+          benchGcRiders.map((rider) => <p key={rider.id}>{rider.name}</p>)
+        ) : (
+          <p>No bench GC riders</p>
+        )}
+      </div>
 
-      <h2>Add a Rider</h2>
-      {availableRiders.map((rider) => (
-        <button key={rider.id} onClick={() => handleAddRider(rider.id)}>
-          {rider.name}
-        </button>
-      ))}
+      <h2>Domestiques</h2>
+      <div>
+        <h3>Active Domestiques</h3>
+        {activeDomestiques.length > 0 ? (
+          activeDomestiques.map((rider) => <p key={rider.id}>{rider.name}</p>)
+        ) : (
+          <p>No active domestiques</p>
+        )}
+      </div>
+      <div>
+        <h3>Bench Domestiques</h3>
+        {benchDomestiques.length > 0 ? (
+          benchDomestiques.map((rider) => <p key={rider.id}>{rider.name}</p>)
+        ) : (
+          <p>No bench domestiques</p>
+        )}
+      </div>
     </div>
   );
 };

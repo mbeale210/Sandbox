@@ -95,6 +95,20 @@ def create_app(config_class=Config):
             "is_gc": rider.is_gc
         } for rider in riders]), 200
 
+    # Open Riders Route - Fetch only unassigned riders
+    @app.route('/riders/open', methods=['GET'])
+    def get_open_riders():
+        open_riders = Rider.query.filter(~Rider.fantasy_teams.any()).all()  # Query for riders not on a team
+        return jsonify([{
+            "id": rider.id,
+            "name": rider.name,
+            "rank": rider.rank,
+            "career_points": rider.career_points,
+            "sprint_pts": rider.sprint_pts,
+            "mountain_pts": rider.mountain_pts,
+            "is_gc": rider.is_gc
+        } for rider in open_riders]), 200
+
     # Teams Route
     @app.route('/teams', methods=['GET', 'POST', 'OPTIONS'])
     @jwt_required()

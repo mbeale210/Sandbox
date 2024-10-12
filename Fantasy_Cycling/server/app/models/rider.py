@@ -10,3 +10,7 @@ class Rider(db.Model):
     is_gc = db.Column(db.Boolean, default=False)
     stage_results = db.relationship('StageResult', backref='rider', lazy=True)
     fantasy_teams = db.relationship('FantasyTeam', secondary='rider_fantasy_team', back_populates='riders', lazy='subquery')
+
+    @property
+    def is_open(self):
+        return len(self.fantasy_teams) == 0  # Returns True if the rider is not on any team
