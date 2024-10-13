@@ -6,7 +6,6 @@ import {
   updateTeamName,
   removeRiderFromTeam,
 } from "../store/slices/teamSlice";
-import RiderList from "../components/RiderList";
 
 const MyTeam = () => {
   const { teamId } = useParams();
