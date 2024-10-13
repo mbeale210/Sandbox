@@ -1,6 +1,6 @@
 import React from "react";
 
-const RiderList = ({ riders, onDraft }) => {
+const RiderList = ({ riders, onDraft, onRemove }) => {
   return (
     <table>
       <thead>
@@ -10,6 +10,7 @@ const RiderList = ({ riders, onDraft }) => {
           <th>Points</th>
           <th>Type</th>
           {onDraft && <th>Action</th>}
+          {onRemove && <th>Remove</th>}
         </tr>
       </thead>
       <tbody>
@@ -22,6 +23,11 @@ const RiderList = ({ riders, onDraft }) => {
             {onDraft && (
               <td>
                 <button onClick={() => onDraft(rider)}>Draft</button>
+              </td>
+            )}
+            {onRemove && (
+              <td>
+                <button onClick={() => onRemove(rider.id)}>Remove</button>
               </td>
             )}
           </tr>

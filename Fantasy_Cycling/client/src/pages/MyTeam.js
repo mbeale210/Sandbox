@@ -1,7 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchUserTeams } from "../store/slices/teamSlice";
+import {
+  fetchUserTeams,
+  updateTeamName,
+  removeRiderFromTeam,
+} from "../store/slices/teamSlice";
+import RiderList from "../components/RiderList";
 
 const MyTeam = () => {
   const { teamId } = useParams();
@@ -9,6 +14,8 @@ const MyTeam = () => {
   const navigate = useNavigate();
   const { teams, loading } = useSelector((state) => state.teams);
   const team = teams.find((t) => t.id.toString() === teamId);
+
+  const [newTeamName, setNewTeamName] = useState(team ? team.name : "");
 
   useEffect(() => {
     dispatch(fetchUserTeams());
@@ -20,6 +27,18 @@ const MyTeam = () => {
     }
   }, [teams, navigate, teamId]);
 
+  const handleTeamNameChange = (e) => {
+    setNewTeamName(e.target.value);
+  };
+
+  const handleUpdateTeamName = () => {
+    dispatch(updateTeamName({ teamId: team.id, newName: newTeamName }));
+  };
+
+  const handleRemoveRider = (riderId) => {
+    dispatch(removeRiderFromTeam({ teamId: team.id, riderId }));
+  };
+
   if (loading) return <div>Loading team...</div>;
   if (!team) return <div>Team not found</div>;
 
@@ -28,14 +47,26 @@ const MyTeam = () => {
 
   return (
     <div className="my-team">
-      <h1>{team.name}</h1>
+      <h1>
+        <input
+          type="text"
+          value={newTeamName}
+          onChange={handleTeamNameChange}
+        />
+        <button onClick={handleUpdateTeamName}>Update Team Name</button>
+      </h1>
       <p>Total Points: {team.sprint_pts + team.mountain_pts}</p>
 
       <h2>GC Riders</h2>
       <div>
         <h3>Active GC Rider</h3>
         {activeGcRider.name ? (
-          <p>{activeGcRider.name}</p>
+          <p>
+            {activeGcRider.name}
+            <button onClick={() => handleRemoveRider(activeGcRider.id)}>
+              Remove
+            </button>
+          </p>
         ) : (
           <p>No active GC rider</p>
         )}
@@ -45,7 +76,14 @@ const MyTeam = () => {
       <div>
         <h3>Active Domestiques</h3>
         {activeDomestiques.length > 0 ? (
-          activeDomestiques.map((rider) => <p key={rider.id}>{rider.name}</p>)
+          activeDomestiques.map((rider) => (
+            <p key={rider.id}>
+              {rider.name}
+              <button onClick={() => handleRemoveRider(rider.id)}>
+                Remove
+              </button>
+            </p>
+          ))
         ) : (
           <p>No active domestiques</p>
         )}

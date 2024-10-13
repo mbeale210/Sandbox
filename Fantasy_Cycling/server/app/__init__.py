@@ -164,6 +164,29 @@ def create_app(config_class=Config):
             } for rider in team.riders]
         }), 200
 
+    # Route to update the team's name
+    @app.route('/teams/<int:team_id>/name', methods=['PUT'])
+    @jwt_required()
+    def update_team_name(team_id):
+        data = request.get_json()
+        team = FantasyTeam.query.get_or_404(team_id)
+        team.name = data['name']
+        db.session.commit()
+        return jsonify({"id": team.id, "name": team.name}), 200
+
+    # Route to remove a rider from the team
+    @app.route('/teams/<int:team_id>/riders/<int:rider_id>', methods=['DELETE'])
+    @jwt_required()
+    def remove_rider_from_team(team_id, rider_id):
+        team = FantasyTeam.query.get_or_404(team_id)
+        rider = Rider.query.get_or_404(rider_id)
+
+        if rider in team.riders:
+            team.riders.remove(rider)
+            db.session.commit()
+            return jsonify({"id": team.id, "riderId": rider.id}), 200
+        return jsonify({"message": "Rider not found on team"}), 404
+
     # Stages Route
     @app.route('/stages', methods=['GET', 'OPTIONS'])
     def get_stages():
