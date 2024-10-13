@@ -104,7 +104,7 @@ const TeamStandings = () => {
           <h2>Rank: {index + 1}</h2>
           <TeamSummary team={team} />
         </div> */}
-      ))}
+      {/* ))} */}
     </div>
   );
 };
