@@ -63,6 +63,28 @@ export const removeRiderFromTeam = createAsyncThunk(
   }
 );
 
+// New action for swapping rider roles between GC and Domestique
+export const swapRiderRole = createAsyncThunk(
+  "teams/swapRiderRole",
+  async ({ teamId, riderId }, { rejectWithValue }) => {
+    try {
+      const response = await api.post(
+        `/teams/${teamId}/riders/${riderId}/swap`,
+        {}, // Make sure the body is an empty object (or provide necessary data)
+        {
+          headers: {
+            "Content-Type": "application/json", // Ensure the correct Content-Type
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+
 const teamSlice = createSlice({
   name: "teams",
   initialState: {
@@ -110,6 +132,12 @@ const teamSlice = createSlice({
           team.riders = team.riders.filter(
             (rider) => rider.id !== action.payload.riderId
           );
+        }
+      })
+      .addCase(swapRiderRole.fulfilled, (state, action) => {
+        const team = state.teams.find((team) => team.id === action.payload.id);
+        if (team) {
+          team.riders = action.payload.riders; // Update the riders after swapping
         }
       });
   },

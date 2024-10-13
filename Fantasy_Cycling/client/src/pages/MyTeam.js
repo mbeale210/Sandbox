@@ -5,6 +5,7 @@ import {
   fetchUserTeams,
   updateTeamName,
   removeRiderFromTeam,
+  swapRiderRole, // Import the new swap action
 } from "../store/slices/teamSlice";
 
 const MyTeam = () => {
@@ -38,6 +39,10 @@ const MyTeam = () => {
     dispatch(removeRiderFromTeam({ teamId: team.id, riderId }));
   };
 
+  const handleSwapRider = (riderId) => {
+    dispatch(swapRiderRole({ teamId: team.id, riderId }));
+  };
+
   if (loading) return <div>Loading team...</div>;
   if (!team) return <div>Team not found</div>;
 
@@ -61,6 +66,9 @@ const MyTeam = () => {
         <h3>Active GC Rider</h3>
         {activeGcRider.name ? (
           <p>
+            <button onClick={() => handleSwapRider(activeGcRider.id)}>
+              Swap
+            </button>
             {activeGcRider.name}
             <button onClick={() => handleRemoveRider(activeGcRider.id)}>
               Remove
@@ -77,6 +85,7 @@ const MyTeam = () => {
         {activeDomestiques.length > 0 ? (
           activeDomestiques.map((rider) => (
             <p key={rider.id}>
+              <button onClick={() => handleSwapRider(rider.id)}>Swap</button>
               {rider.name}
               <button onClick={() => handleRemoveRider(rider.id)}>
                 Remove

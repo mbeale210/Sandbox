@@ -31,7 +31,7 @@ def create_app(config_class=Config):
     @app.route('/auth/register', methods=['POST'])
     def register():
         data = request.get_json()
-        if User.query.filter_by(username=data['username']).first():
+        if User.query.filter_by(username(data['username'])).first():
             return jsonify({"message": "Username already exists"}), 400
         if User.query.filter_by(email=data['email']).first():
             return jsonify({"message": "Email already exists"}), 400
@@ -186,6 +186,30 @@ def create_app(config_class=Config):
             db.session.commit()
             return jsonify({"id": team.id, "riderId": rider.id}), 200
         return jsonify({"message": "Rider not found on team"}), 404
+
+    # Route to swap a GC rider with a domestique
+    @app.route('/teams/<int:team_id>/riders/<int:rider_id>/swap', methods=['POST', 'OPTIONS'])
+    @jwt_required()
+    def swap_rider_role(team_id, rider_id):
+        if request.method == 'OPTIONS':
+            return jsonify({'message': 'CORS preflight successful'}), 200
+
+        team = FantasyTeam.query.get_or_404(team_id)
+        rider = Rider.query.get_or_404(rider_id)
+
+        # Check if rider is in the team
+        if rider not in team.riders:
+            return jsonify({"message": "Rider not found on the team"}), 404
+
+        # Swap role (GC to domestique and vice versa)
+        rider.is_gc = not rider.is_gc
+        db.session.commit()
+
+        return jsonify({
+            "id": rider.id,
+            "name": rider.name,
+            "is_gc": rider.is_gc
+        }), 200
 
     # Stages Route
     @app.route('/stages', methods=['GET', 'OPTIONS'])
