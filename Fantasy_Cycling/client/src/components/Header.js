@@ -1,11 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import { useSelector } from "react-redux";
 import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const { user } = useSelector((state) => state.auth || {});
   const { logout } = useAuth();
+  const navigate = useNavigate(); // Initialize useNavigate for redirection
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/"); // Redirect to home page after logout
+  };
 
   return (
     <header>
@@ -33,7 +39,7 @@ const Header = () => {
                 <Link to="/standings">Team Standings</Link>
               </li>
               <li>
-                <button onClick={logout}>Logout</button>
+                <button onClick={handleLogout}>Logout</button>
               </li>
             </>
           ) : (
